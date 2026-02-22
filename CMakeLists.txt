@@ -117,8 +117,8 @@ add_custom_command(TARGET ImGuiHydraEditor
 	#### Copy the required plugins to the binary directory. ####
 	#### Mandatory for the application to run. ####
 	COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/${TargetName}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>$<$<CONFIG:Release>:/Release>/usd/"
-	COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_BINARY_DIR}/vcpkg_installed/x64-windows/bin/usd" "${CMAKE_BINARY_DIR}/${TargetName}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>$<$<CONFIG:Release>:/Release>/usd/"
-	COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_BINARY_DIR}/vcpkg_installed/x64-windows/plugin/usd" "${CMAKE_BINARY_DIR}/${TargetName}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>$<$<CONFIG:Release>:/Release>/usd/"
+	COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_BINARY_DIR}/vcpkg_installed/x64-windows/$<$<CONFIG:Debug>:Debug/>bin/usd" "${CMAKE_BINARY_DIR}/${TargetName}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>$<$<CONFIG:Release>:/Release>/usd/"
+	COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_BINARY_DIR}/vcpkg_installed/x64-windows/$<$<CONFIG:Debug>:Debug/>plugin/usd" "${CMAKE_BINARY_DIR}/${TargetName}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>$<$<CONFIG:Release>:/Release>/usd/"
 	
 	#base plugin file
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_BINARY_DIR}/vcpkg_installed/x64-windows/lib/usd/plugInfo.json" "${CMAKE_BINARY_DIR}/${TargetName}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>$<$<CONFIG:Release>:/Release>/usd/"
