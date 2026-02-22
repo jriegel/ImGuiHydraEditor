@@ -10,7 +10,7 @@
 #pragma once
 
 #define IMGUI_DEFINE_MATH_OPERATORS
-#include <TextEditor.h>
+#include "../texteditor/TextEditor.h"
 #include <pxr/usdImaging/usdImaging/stageSceneIndex.h>
 
 #include "view.h"

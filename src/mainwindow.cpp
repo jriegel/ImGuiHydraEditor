@@ -21,7 +21,7 @@ MainWindow::MainWindow(Model* model) : _model(model)
 
 void MainWindow::Update()
 {
-    ImGui::DockSpaceOverViewport();
+    //ImGui::DockSpaceOverViewport();
 
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("Windows")) {

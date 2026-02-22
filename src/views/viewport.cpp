@@ -1,6 +1,6 @@
 #include "viewport.h"
 
-#include <ImGuiFileDialog.h>
+#include "../filedialog/ImGuiFileDialog.h"
 #include <pxr/base/gf/camera.h>
 #include <pxr/base/gf/frustum.h>
 #include <pxr/base/gf/matrix4f.h>
@@ -19,6 +19,8 @@ Viewport::Viewport(Model* model, const string label) : View(model, label)
     _isAmbientLightEnabled = true;
     _isDomeLightEnabled = false;
     _isGridEnabled = true;
+
+	_engine = nullptr;
 
     _curOperation = ImGuizmo::TRANSLATE;
     _curMode = ImGuizmo::LOCAL;
@@ -207,8 +209,8 @@ void Viewport::_UpdateHydraRender()
     }
 
     GfMatrix4d view = _getCurViewMatrix();
-    float width = _GetViewportWidth();
-    float height = _GetViewportHeight();
+    int width = _GetViewportWidth();
+    int height = _GetViewportHeight();
 
     // set selection
     SdfPathVector paths;
@@ -222,7 +224,7 @@ void Viewport::_UpdateHydraRender()
     // do the render
     _engine->Render();
 
-    void* id = _engine->GetRenderBufferData();
+    ImTextureID id = (ImTextureID)_engine->GetRenderBufferData();
     ImGui::Image(id, ImVec2(width, height), ImVec2(0, 1), ImVec2(1, 0));
 }
 

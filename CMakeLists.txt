@@ -2,16 +2,24 @@ cmake_minimum_required(VERSION 3.12)
 
 project(ImGuiHydraEditor VERSION 0.0.1 DESCRIPTION "ImGui Hydra Editor")
 
-include(GNUInstallDirs)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(X11)
 find_package(pxr REQUIRED)
 find_package(OpenGL REQUIRED)
+find_package(imgui CONFIG REQUIRED)
+find_package(imguizmo CONFIG REQUIRED)
+find_package(glfw3 CONFIG REQUIRED)
+find_package(GLEW CONFIG REQUIRED)
 
-add_subdirectory(vendors)
+
+
+if(WIN32)
+	message("Building for Windows: disabling min/max macros from minwin.h which collide with OpenUSD max member function in robin_growth_policy.h")
+	add_compile_definitions(NOMINMAX)
+	add_compile_definitions(USE_STD_FILESYSTEM)
+endif()
 
 file(GLOB SRC_CPP
   RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
@@ -21,6 +29,9 @@ file(GLOB SRC_CPP
   "src/sceneindices/*.cpp"
   "src/style/*.cpp"
   "src/views/*.cpp"
+  "src/filedialog/*.cpp"
+  "src/texteditor/*.cpp"
+  "src/backends/*.cpp"
 )
 
 file(GLOB SRC_H
@@ -32,83 +43,85 @@ file(GLOB SRC_H
   "src/style/*.h"
   "src/views/*.h"
   "src/backends/*.h"
+  "src/filedialog/*.h"
+  "src/texteditor/*.h"
 )
 
-set(LIBRARIES
-    ${PXR_LIBRARIES}
-    imgui
-    imguizmo
-    imguicolortextedit
-    imguifiledialog
-)
 
-# Add the backend for the graphics according to the OS
-if(APPLE AND NOT FORCE_OPENGL)
-    list(APPEND SRC_CPP "src/backends/metal.mm")
-    list(APPEND LIBRARIES
-            "-framework Cocoa"
-            "-framework Metal"
-            "-framework QuartzCore"
-            "-framework GameController"
-            "-framework AppKit"
-            "-framework MetalKit"
-    )
-else()
-    list(APPEND SRC_CPP "src/backends/opengl.cpp")
-    list(APPEND LIBRARIES
-        libglew_static
-        glfw
-    )
-endif()
+add_executable(ImGuiHydraEditor ${SRC_CPP} ${SRC_H})
 
-# Configure RPATH so libraries are found after make install
-if(APPLE)
-    set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-elseif(UNIX)
-    set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib64")
-elseif(WIN32)
-    target_compile_definitions(${PROJECT_NAME}
-        PRIVATE
-            NOMINMAX
-            _USE_MATH_DEFINES
-    )
-endif()
-
-add_executable(${PROJECT_NAME} ${SRC_CPP} ${SRC_H})
-
-target_include_directories(${PROJECT_NAME}
+target_include_directories(ImGuiHydraEditor
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries(ImGuiHydraEditor
     PRIVATE
-        ${LIBRARIES}
+        imgui::imgui
+        imguizmo::imguizmo
+        
+        OpenGL::GL
+        glfw
+        GLEW::GLEW
+        ar
+	    arch
+	    gf
+	    js
+	    kind
+	    #ndr
+	    pcp
+	    plug
+	    sdf
+	    sdr
+	    tf
+	    trace
+	    usd
+	    usdGeom
+	    usdHydra
+	    usdLux
+	    usdMedia
+	    usdPhysics
+	    usdRender
+	    usdShade
+	    usdSkel
+	    usdUI
+	    usdUtils
+	    usdVol
+        usdProc
+        usdRi
+        usdSkel
+	    vt
+	    work
+		hd
+		hdx
+		glf
+		garch 
+		hio
+        hf
+		hgiGL
+		hgiInterop
+		hdar
+		hdGp
+		usdImaging
+		usdImagingGL
+		usdRiPxrImaging
+		usdProcImaging
+
 )
 
-include_directories(${PROJECT_NAME} ${PXR_INCLUDE_DIRS})
+include_directories(ImGuiHydraEditor PRIVATE ${pxr_INCLUDE_DIRS} ${imgui_INCLUDE_DIRS})
 
-# --------------- install section ---------------
+add_custom_command(TARGET ImGuiHydraEditor
+	POST_BUILD
 
-install(
-    TARGETS ${PROJECT_NAME}
-)
+	#### Copy the required plugins to the binary directory. ####
+	#### Mandatory for the application to run. ####
+	COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/${TargetName}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>$<$<CONFIG:Release>:/Release>/usd/"
+	COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_BINARY_DIR}/vcpkg_installed/x64-windows/bin/usd" "${CMAKE_BINARY_DIR}/${TargetName}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>$<$<CONFIG:Release>:/Release>/usd/"
+	COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_BINARY_DIR}/vcpkg_installed/x64-windows/plugin/usd" "${CMAKE_BINARY_DIR}/${TargetName}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>$<$<CONFIG:Release>:/Release>/usd/"
+	
+	#base plugin file
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_BINARY_DIR}/vcpkg_installed/x64-windows/lib/usd/plugInfo.json" "${CMAKE_BINARY_DIR}/${TargetName}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>$<$<CONFIG:Release>:/Release>/usd/"
+	
 
-IF(EXISTS ${PXR_CMAKE_DIR}/lib)
-    INSTALL(
-        DIRECTORY ${PXR_CMAKE_DIR}/lib
-        DESTINATION ${CMAKE_INSTALL_PREFIX}
-    )
-endif()
-
-IF(EXISTS ${PXR_CMAKE_DIR}/lib64)
-    INSTALL(
-        DIRECTORY ${PXR_CMAKE_DIR}/lib64
-        DESTINATION ${CMAKE_INSTALL_PREFIX}
-    )
-endif()
-
-INSTALL(
-    DIRECTORY ${PXR_CMAKE_DIR}/plugin
-    DESTINATION ${CMAKE_INSTALL_PREFIX}
 )

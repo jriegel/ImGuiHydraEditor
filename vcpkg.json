@@ -1,0 +1,20 @@
+{
+  "name": "imgui-hydra-editor",
+  "version": "0.2.0",
+  "dependencies": [
+    { "name":"usd",
+      "features": [
+        "imaging"
+      ]
+    },
+   { "name":"imgui",
+      "features": [
+        "glfw-binding",
+        "opengl3-binding"
+      ]
+    },
+    "glew",
+    "glfw3",
+    "imguizmo"
+  ]
+}
